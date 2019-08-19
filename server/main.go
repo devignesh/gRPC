@@ -28,7 +28,7 @@ func main() {
 	}
 	s := grpc.NewServer()
 	pb.RegisterHellooServer(s, &server{})
-	fmt.Println("Running on ", port)
+	fmt.Println("Server running on ", port)
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}

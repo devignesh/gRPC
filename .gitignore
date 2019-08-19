@@ -1,2 +1,2 @@
-clientd
-serverd
+grpc_client
+grpc_server

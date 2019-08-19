@@ -5,36 +5,41 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	pb "../proto"
 	"google.golang.org/grpc"
 )
 
-const (
-	address     = "localhost:50051"
-	defaultName = "hello"
+var (
+	ctx      = context.Background()
+	greeting = "hello"
 )
 
 func main() {
+	address := os.Getenv("GRPC_SERVER") + ":50051"
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
+	fmt.Println("Connected with server...")
 	c := pb.NewHellooClient(conn)
 
-	name := defaultName
-	if len(os.Args) > 1 {
-		name = os.Args[1]
+	if len(os.Args) > 1 && strings.TrimSpace(os.Args[1]) != "" {
+		greeting = os.Args[1]
 	}
-
-	ctx := context.Background()
+	sayHello(c)
 	for range time.Tick(5 * time.Second) {
-		r, err := c.SayHello(ctx, &pb.HelloRequest{Name: name})
-		if err != nil {
-			log.Fatalf("could not greet: %v", err)
-		}
-		fmt.Println(r.Message)
+		sayHello(c)
 	}
+}
+
+func sayHello(c pb.HellooClient) {
+	r, err := c.SayHello(ctx, &pb.HelloRequest{Name: greeting})
+	if err != nil {
+		log.Fatalf("could not greet: %v", err)
+	}
+	fmt.Println(r.Message)
 }
